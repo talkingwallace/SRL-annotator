@@ -1,6 +1,8 @@
 import argparse
 import json
 import re
+import database as db
+from shelve import DbfilenameShelf
 
 spliter = lambda x: x.strip().split(',')
 punctuation = ['。', '，', '？', '&', '！', '@', '；', '（', '）', '、']
@@ -10,31 +12,34 @@ def get_annotated_num(out_file):
     return len(out_file.readlines())
 
 
-def main():
+def main(data:DbfilenameShelf):
+
     print('=' * 50)
-    in_file = open(in_path, 'r', encoding='utf-8')
-    out_file = open(out_path, 'r', encoding='utf-8')
+    todo = set(data['id2sent'].keys()).difference(data['done'])
+    for sentid in todo:
 
-    start_index = get_annotated_num(out_file)
-
-    out_file.close()
-
-    out_file = open(out_path, 'a+', encoding='utf-8')
-
-    lines = in_file.readlines()
-    for i in range(start_index, len(lines)):
-        print('Sentences {}/{}'.format(i + 1, len(lines)))
-        record = json.loads(lines[i].strip())
-        conversations = record['conversation']
+        print('{} Sentences to go'.format(len(todo)))
+        record = data['id2sent'][sentid]
+        record = record.split(' ')
         i = 0
-        for conversation in conversations:
-            conversation = conversation.split(' ')
-            conversation = [word + '(' + str(i + j) + ')' if word not in punctuation else word
-                            for (j, word) in enumerate(conversation)]
-            i += len(conversation)
-            conversation = ' '.join(conversation)
-            print(conversation)
+        conversation = ''
+        for word in record:
+            # conversation = conversation.split(' ')
+            # conversation = [word + '(' + str(i + j) + ')' if word not in punctuation else word
+            #                 for (j, word) in enumerate(conversation)]
+            # i += len(conversation)
+            # conversation = ' '.join(conversation)
+            if word in punctuation:
+                conversation += word
+                continue
+            if word == '<SEP>':
+                conversation += '\n'
+                continue
 
+            conversation += word+'({}) '.format(i)
+            i += 1
+
+        print(conversation)
         item_dict = dict()
         item_dict['id'] = i
         item_dict['srl'] = list()
@@ -76,7 +81,10 @@ def main():
             while True:
                 next_pred = input('Are there other predicates [Y/n]')
                 if next_pred.lower() == 'n':
-                    out_file.write(json.dumps(item_dict))
+                    for dic in item_dict['srl']:
+                        pred_idx = dic['pred']
+                        dic.pop('pred')
+                        db.save_annotations(data,sentid,pred_idx,dic,commit=True)
                     flag = False
                     break
                 if next_pred.lower() == 'y' or next_pred.lower() is None:
@@ -84,11 +92,21 @@ def main():
 
 
 if __name__ == '__main__':
+
     arg_parse = argparse.ArgumentParser()
-    arg_parse.add_argument("-in_path", type=str, help='Please specify the input file.', required=True)
-    arg_parse.add_argument("-out_path", type=str, required=False, default='out.txt')
+    arg_parse.add_argument("-project_name", type=str, required=True, default='default')
+    arg_parse.add_argument("-file_path", type=str, help='Please specify the input file, if a project is not created'
+                                                      , required=False)
 
     config = arg_parse.parse_args()
-    in_path = config.in_path
-    out_path = config.out_path
-    main()
+    file_path = config.file_path
+    project_name = config.project_name
+
+    # file_path = r'E:\tencent_nlp\SRL-annotator\to_annotate\dev2.txt'
+    # project_name = 'default'
+
+    data = db.load_database(project_name)
+    if data is None:
+        data = db.start_a_project(file_path,project_name)
+
+    main(data)

@@ -9,7 +9,7 @@ def combine_conv(conv:list):
     for sent in conv:
         if sent[-1] != ' ':
             sent += ' '
-        full_sent += sent
+        full_sent += sent + '<SEP> '
     return full_sent[:-1]
 
 if __name__ == '__main__':
