@@ -3,27 +3,43 @@ import json
 import re
 
 spliter = lambda x: x.strip().split(',')
+punctuation = ['。', '，', '？', '&', '！', '@', '；', '（', '）', '、']
+
+
+def get_annotated_num(out_file):
+    return len(out_file.readlines())
 
 
 def main():
     print('=' * 50)
     in_file = open(in_path, 'r', encoding='utf-8')
-    out_file = open(out_path, 'a+', encoding='utf-8')
+    out_file = open(out_path, 'r', encoding='utf-8')
 
-    start_index = 0  # get from out file's length
+    start_index = get_annotated_num(out_file)
+
+    out_file.close()
+
+    out_file = open(out_path, 'a+', encoding='utf-8')
 
     lines = in_file.readlines()
     for i in range(start_index, len(lines)):
+        print('Sentences {}/{}'.format(i + 1, len(lines)))
         record = json.loads(lines[i].strip())
         conversations = record['conversation']
-        document = ''.join(conversations).strip().split(' ')
-        document = [word + '_' + str(i) for (i, word) in enumerate(document)]
-        print('Sentences {}/{}'.format(i + 1, len(lines)))
-        print(' '.join(document))
+        i = 0
+        for conversation in conversations:
+            conversation = conversation.split(' ')
+            conversation = [word + '(' + str(i + j) + ')' if word not in punctuation else word
+                            for (j, word) in enumerate(conversation)]
+            i += len(conversation)
+            conversation = ' '.join(conversation)
+            print(conversation)
+
         item_dict = dict()
         item_dict['id'] = i
         item_dict['srl'] = list()
-        while True:
+        flag = True
+        while flag:
             pred = input('Enter the predicate index:')
             if re.match('^\d+$', pred):
                 tmp_dict = dict()
@@ -57,17 +73,20 @@ def main():
 
             else:
                 print('Invalid value {}'.format(pred))
-            next_pred = input('Are there other predicates [Y/n]')
-            if next_pred.lower() == 'n':
-                out_file.write(json.dumps(item_dict))
-                break
+            while True:
+                next_pred = input('Are there other predicates [Y/n]')
+                if next_pred.lower() == 'n':
+                    out_file.write(json.dumps(item_dict))
+                    flag = False
+                    break
+                if next_pred.lower() == 'y' or next_pred.lower() is None:
+                    break
 
 
 if __name__ == '__main__':
     arg_parse = argparse.ArgumentParser()
     arg_parse.add_argument("-in_path", type=str, help='Please specify the input file.', required=True)
     arg_parse.add_argument("-out_path", type=str, required=False, default='out.txt')
-    arg_parse.add_argument('-author', type=str, required=True)
 
     config = arg_parse.parse_args()
     in_path = config.in_path
