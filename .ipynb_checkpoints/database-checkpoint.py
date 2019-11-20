@@ -39,19 +39,17 @@ def start_a_task(data:DbfilenameShelf,sent_ids:set):
     data['todo'] = sent_ids
 
 
-def save_annotations(data:DbfilenameShelf,sent_id:int,pred_idx:int,arg:dict):
+def save_annotations(data:DbfilenameShelf,sent_id:int,pred_idx:int,arg:dict,commit=False):
 
     assert sent_id in data['id2sent']
 
     new_row = pd.DataFrame({'sentid':[sent_id],'pred':[pred_idx],'args':[arg],'timestamp':[str(time.time())]})
     data['annotation'] = data['annotation'].append(new_row)
-    data.sync()
 
-def commit(data:DbfilenameShelf,sent_id):
-    data['done'].add(sent_id)
-    print(sent_id,'added into done')
+    if commit:
+        data['done'].add(sent_id)
+        print('one record of sent id:',sent_id,' committed')
     data.sync()
-
 
 def load_database(project_name:str):
 
@@ -66,31 +64,7 @@ def check_all_annotation(data:DbfilenameShelf):
 def output_annotations():
     pass
 
-class DataManager(object):
-
-    def __init__(self,project_name,file_path=None,):
-
-        self.data = load_database(project_name)
-        if self.data is None:
-            self.data = start_a_project(file_path,project_name)
-        self.todo = list(set(self.data['id2sent'].keys()).difference(self.data['done']))
-        self.cur_idx = 0
-
-    def fetch_next(self,):
-        return self.todo[self.cur_idx]
-
-    def commit(self,):
-
-        sent_id = self.todo[self.cur_idx]
-        commit(self.data, sent_id)
-        self.cur_idx += 1
-
-    def save(self,sent_id:int,pred_idx:int,arg:dict):
-        save_annotations(self.data,sent_id,pred_idx,arg)
-
-
 if __name__ == '__main__':
 
     # data = start_a_project(file_path='./to_annotate/dev2.txt')
-    # data = load_database('default')
-    datamanager = DataManager('default')
+    data = load_database('default')
