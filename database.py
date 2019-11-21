@@ -67,7 +67,7 @@ def check_all_annotation(data:DbfilenameShelf):
 
 def output_annotations(data:DbfilenameShelf):
     df:pd.DataFrame = data['annotation']
-    out_name = './result/' + 'results' + str(time.time()) + '.txt'
+    out_name = './result/' + 'result' + str(int(time.time())) + '.txt'
     outf = open(out_name, 'a+', encoding='utf-8')
     a = df.reset_index()
     sent_id_set = set(a['sentid'])
