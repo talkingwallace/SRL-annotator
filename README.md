@@ -7,3 +7,6 @@
   project, the second is the path of file in which sentences are separated by '\n'
   
 - execute code in the cell(ALT+ENTER) to start
+
+- The format of output records (json list):
+``{'sentid': sent_id, 'srl': [{'pred': 0, 'args':{'arg0': [], 'arg1': []}}, {'pred': 1, ...}, {'pred': 2, ...}, ...], 'sent': sentence}``

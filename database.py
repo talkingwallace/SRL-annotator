@@ -66,12 +66,25 @@ def check_all_annotation(data:DbfilenameShelf):
     return data['annotation']
 
 def output_annotations(data:DbfilenameShelf):
-    df = data['annotation']
+    df:pd.DataFrame = data['annotation']
+    out_name = './result/' + 'results' + str(time.time()) + '.txt'
+    outf = open(out_name, 'a+', encoding='utf-8')
     a = df.reset_index()
-    json_str = a.to_json(orient='index',force_ascii=False)
-    out_name = './result/'+'result'+str(time.time())+'.txt'
-    outf = open(out_name,'w',encoding='utf-8')
-    outf.write(json_str)
+    sent_id_set = set(a['sentid'])
+    new_record = {}
+    for sent_id in sent_id_set:
+        new_record['sentid'] = sent_id
+        srl_list = []
+        same_id_df = a[a['sentid'] == sent_id]
+        for i, row in same_id_df.iterrows():
+            tmp_dict = {}
+            tmp_dict['pred'] = int(row['pred'])
+            tmp_dict['args'] = row['args']
+            srl_list.append(tmp_dict)
+        new_record['srl'] = srl_list
+        new_record['sent'] = same_id_df.iloc[0]['sent']
+        json_str = json.dumps(new_record, ensure_ascii=False)
+        outf.write(json_str + '\n')
     outf.close()
 
 class DataManager(object):
