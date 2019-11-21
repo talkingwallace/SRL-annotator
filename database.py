@@ -27,7 +27,8 @@ def start_a_project(file_path,project_name='default',):
 
     data['id2sent'] = {hash(v):v for idx,v in enumerate(sents)}
     data['sent2id'] = {v:hash(v) for idx,v in enumerate(sents)}
-    data['annotation'] = pd.DataFrame({'sentid':[],'pred':[],'args':[],'timestamp':[]})
+    data['annotation'] = pd.DataFrame({'sentid':[],'pred':[],'args':[],'sent':[]})
+    # 'timestamp':[]
     data['done'] = set()
     data.sync()
 
@@ -43,7 +44,8 @@ def save_annotations(data:DbfilenameShelf,sent_id:int,pred_idx:int,arg:dict):
 
     assert sent_id in data['id2sent']
 
-    new_row = pd.DataFrame({'sentid':[sent_id],'pred':[pred_idx],'args':[arg],'timestamp':[str(time.time())]})
+    new_row = pd.DataFrame({'sentid':[sent_id],'pred':[pred_idx],'args':[arg],'sent':[data['id2sent'][sent_id]]})
+    # 'timestamp':[str(time.time())]
     data['annotation'] = data['annotation'].append(new_row)
     data.sync()
 
@@ -63,8 +65,14 @@ def load_database(project_name:str):
 def check_all_annotation(data:DbfilenameShelf):
     return data['annotation']
 
-def output_annotations():
-    pass
+def output_annotations(data:DbfilenameShelf):
+    df = data['annotation']
+    a = df.reset_index()
+    json_str = a.to_json(orient='index',force_ascii=False)
+    out_name = './result/'+'result'+str(time.time())+'.txt'
+    outf = open(out_name,'w',encoding='utf-8')
+    outf.write(json_str)
+    outf.close()
 
 class DataManager(object):
 
