@@ -77,10 +77,17 @@ def output_annotations(data:DbfilenameShelf):
         srl_list = []
         same_id_df = a[a['sentid'] == sent_id]
         for i, row in same_id_df.iterrows():
-            tmp_dict = {}
-            tmp_dict['pred'] = int(row['pred'])
-            tmp_dict['args'] = row['args']
-            srl_list.append(tmp_dict)
+            srl_tmp_pred = set([d['pred'] for d in srl_list])
+            tmp_pred = int(row['pred'])
+            if tmp_pred not in srl_tmp_pred:
+                tmp_dict = {}
+                tmp_dict['pred'] = int(row['pred'])
+                tmp_dict['args'] = row['args']
+                srl_list.append(tmp_dict)
+            else:
+                for d in srl_list:
+                    if d['pred'] == tmp_pred:
+                        d['args'] = row['args']
         new_record['srl'] = srl_list
         new_record['sent'] = same_id_df.iloc[0]['sent']
         json_str = json.dumps(new_record, ensure_ascii=False)
