@@ -115,6 +115,30 @@ class DataManager(object):
 
     def save(self,sent_id:int,pred_idx:int,arg:dict):
         save_annotations(self.data,sent_id,pred_idx,arg)
+        
+    def drop(self,send_id):
+        pass
+
+    def modify(self,sent_id):
+        pass
+
+    def search_by_keyword(self,keyword):
+
+        df = self.data['annotation']
+        return df[df['sent'].apply(lambda x:keyword in x)]
+
+    def search_by_arg(self,arg_name:str,arg_span=None):
+
+        df = self.data['annotation']
+        return df[df['args'].apply(lambda x:arg_name in x)]
+
+    def search_by_pred(self,pred:str):
+        df = self.data['annotation']
+        return df[df[['pred','sent']].apply(lambda x: x['sent'].replace('<SEP> ','').split(' ')[int(x['pred'])] == pred,axis=1)]
+
+    def get_all_pred(self,):
+        df = self.data['annotation']
+        return df[['pred', 'sent']].apply(lambda x: x['sent'].replace('<SEP> ','').split(' ')[int(x['pred'])], axis=1)
 
 
 if __name__ == '__main__':
