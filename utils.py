@@ -21,6 +21,7 @@ def search_by_pred(dm: DataManager, pred: str):
 
 
 def load_data(dm, sentid):
+    print(sentid)
     data = dm.data
     punctuation = ['。', '，', '？', '&', '！', '@', '；', '（', '）', '、']
     record = data['id2sent'][sentid]

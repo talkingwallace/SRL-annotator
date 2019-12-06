@@ -107,7 +107,7 @@ class DataManager(object):
         self.total_sent = len(set(self.data['id2sent'].keys()))
         self.done_num = len(self.data['done'])
         self.all_sent_id = list(set(self.data['id2sent'].keys()))
-        self.todo = list(set(self.data['id2sent'].keys()).difference(self.data['done']))
+        # self.to_do = list(set(self.data['id2sent'].keys()).difference(self.data['done']))
         self.cur_idx = len(self.data['done'])
 
     def fetch_current(self):
@@ -122,9 +122,9 @@ class DataManager(object):
 
     def fetch_next(self):
         if self.cur_idx >= self.done_num:
-            print('Just can review the sentences labeled!')
+            print('Just can review the labeled sentences!')
             self.cur_idx = self.done_num
-            return self.all_sent_id[self.done_num]
+            return self.all_sent_id[self.cur_idx]
         else:
             self.cur_idx += 1
             return self.all_sent_id[self.cur_idx]
@@ -140,10 +140,12 @@ class DataManager(object):
             return self.all_sent_id[self.done_num]
 
     def commit(self, ):
-        sent_id = self.todo[self.cur_idx]
+        # sent_id = self.to_do[self.cur_idx]
+        sent_id = self.all_sent_id[self.cur_idx]
         commit(self.data, sent_id)
+        if self.cur_idx == self.done_num:
+            self.done_num += 1
         self.cur_idx += 1
-        self.done_num += 1
 
     def save(self, sent_id: int, pred_idx: int, arg: dict):
         save_annotations(self.data, sent_id, pred_idx, arg)
