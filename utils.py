@@ -73,7 +73,8 @@ def load_data(dm, sentid):
                 traceback.print_exc()
 
 
-def display_all(dm: DataManager, box_list: list):
+def display_all(dm: DataManager, box_list: list, extra_box=None):
     for box in box_list:
         display(box)
     print('progress:{}/{}'.format(dm.cur_idx, dm.total_sent))
+    display(extra_box)

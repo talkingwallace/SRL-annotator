@@ -105,13 +105,12 @@ class DataManager(object):
         if self.data is None:
             self.data = start_a_project(file_path, project_name)
         self.total_sent = len(set(self.data['id2sent'].keys()))
-        # self.done_num = len(self.data['done'])
+        self.done_num = len(self.data['done'])
         self.all_sent_id = list(set(self.data['id2sent'].keys()))
         self.todo = list(set(self.data['id2sent'].keys()).difference(self.data['done']))
         self.cur_idx = len(self.data['done'])
 
-    def fetch_next(self, ):
-        # return self.todo[self.cur_idx]
+    def fetch_current(self):
         return self.all_sent_id[self.cur_idx]
 
     def fetch_prev(self):
@@ -121,13 +120,30 @@ class DataManager(object):
         else:
             return -1
 
+    def fetch_next(self):
+        if self.cur_idx >= self.done_num:
+            print('Just can review the sentences labeled!')
+            self.cur_idx = self.done_num
+            return self.all_sent_id[self.done_num]
+        else:
+            self.cur_idx += 1
+            return self.all_sent_id[self.cur_idx]
+
     def fetch_by_index(self, index):
-        pass
+        index = int(index)
+        if 0 <= index <= self.done_num:
+            self.cur_idx = index
+            return self.all_sent_id[index]
+        else:
+            print('The index should between 0 and {}'.format(self.done_num))
+            self.cur_idx = self.done_num
+            return self.all_sent_id[self.done_num]
 
     def commit(self, ):
         sent_id = self.todo[self.cur_idx]
         commit(self.data, sent_id)
         self.cur_idx += 1
+        self.done_num += 1
 
     def save(self, sent_id: int, pred_idx: int, arg: dict):
         save_annotations(self.data, sent_id, pred_idx, arg)
