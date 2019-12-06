@@ -142,9 +142,8 @@ class DataManager(object):
         # sent_id = self.to_do[self.cur_idx]
         sent_id = self.all_sent_id[self.cur_idx]
         commit(self.data, sent_id)
-        if self.cur_idx == self.done_num:
-            self.done_num += 1
         self.cur_idx += 1
+        self.done_num = len(self.data['done'])
 
     def save(self, sent_id: int, pred_idx: int, arg: dict):
         save_annotations(self.data, sent_id, pred_idx, arg)
