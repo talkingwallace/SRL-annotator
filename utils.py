@@ -21,7 +21,7 @@ def search_by_pred(dm: DataManager, pred: str):
 
 
 def load_data(dm, sentid):
-    print(sentid)
+    print('sentid: ' + str(sentid))
     data = dm.data
     punctuation = ['。', '，', '？', '&', '！', '@', '；', '（', '）', '、']
     record = data['id2sent'][sentid]
@@ -50,7 +50,7 @@ def load_data(dm, sentid):
     print('possible predicate:')
     print(predicate_suggests)
     if sentid in data['done']:
-        print('Done labels:')
+        print('\nDone labels:')
         done_labels_df: pd.DataFrame = data['annotation']
         selected_df = done_labels_df[done_labels_df['sentid'] == sentid]
         for i, row in selected_df.iterrows():

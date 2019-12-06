@@ -46,7 +46,6 @@ def save_annotations(data: DbfilenameShelf, sent_id: int, pred_idx: int, arg: di
     assert sent_id in data['id2sent']
 
     new_row = pd.DataFrame({'sentid': [sent_id], 'pred': [pred_idx], 'args': [arg], 'sent': [data['id2sent'][sent_id]]})
-    # 'timestamp':[str(time.time())]
     data['annotation'] = data['annotation'].append(new_row)
     data.sync()
 
