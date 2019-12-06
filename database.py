@@ -4,6 +4,7 @@ import os
 import pandas as pd
 import time
 import json
+
 """
 Important key in shelve:
 id2sent: unique Id set for all sentences
@@ -12,61 +13,63 @@ todo: set of sent Id, record id of sentences to be annotated
 annotations: a pandas data frame which store annotations 
 """
 
-def start_a_project(file_path,project_name='default',):
 
+def start_a_project(file_path, project_name='default', ):
     data_name = project_name
     if os.path.exists(data_name):
         os.rmdir(data_name)
-    data = shelve.open(data_name,writeback=True)
+    data = shelve.open(data_name, writeback=True)
 
-    f = open(file_path,'r',encoding='utf-8')
-    sents = f.read().split('\n')
-    if sents[-1] == '':
-        sents = sents[:-1]
-    sents = set(sents)
+    f = open(file_path, 'r', encoding='utf-8')
+    lines = f.readlines()
+    sents = set()
+    for line in lines:
+        if line is not None and len(line.strip()) > 0:
+            sents.update(line.strip())
 
-    data['id2sent'] = {hash(v):v for idx,v in enumerate(sents)}
-    data['sent2id'] = {v:hash(v) for idx,v in enumerate(sents)}
-    data['annotation'] = pd.DataFrame({'sentid':[],'pred':[],'args':[],'sent':[]})
+    data['id2sent'] = {hash(v): v for idx, v in enumerate(sents)}
+    data['sent2id'] = {v: hash(v) for idx, v in enumerate(sents)}
+    data['annotation'] = pd.DataFrame({'sentid': [], 'pred': [], 'args': [], 'sent': []})
     # 'timestamp':[]
     data['done'] = set()
     data.sync()
 
     return data
 
-def start_a_task(data:DbfilenameShelf,sent_ids:set):
 
+def start_a_task(data: DbfilenameShelf, sent_ids: set):
     assert sent_ids.issubset(set(data['id2sent'].keys()))
     data['todo'] = sent_ids
 
 
-def save_annotations(data:DbfilenameShelf,sent_id:int,pred_idx:int,arg:dict):
-
+def save_annotations(data: DbfilenameShelf, sent_id: int, pred_idx: int, arg: dict):
     assert sent_id in data['id2sent']
 
-    new_row = pd.DataFrame({'sentid':[sent_id],'pred':[pred_idx],'args':[arg],'sent':[data['id2sent'][sent_id]]})
+    new_row = pd.DataFrame({'sentid': [sent_id], 'pred': [pred_idx], 'args': [arg], 'sent': [data['id2sent'][sent_id]]})
     # 'timestamp':[str(time.time())]
     data['annotation'] = data['annotation'].append(new_row)
     data.sync()
 
-def commit(data:DbfilenameShelf,sent_id):
+
+def commit(data: DbfilenameShelf, sent_id):
     data['done'].add(sent_id)
-    print(sent_id,'added into done')
+    print(sent_id, 'added into done')
     data.sync()
 
 
-def load_database(project_name:str):
-
-    if not os.path.exists(project_name+'.dat'):
+def load_database(project_name: str):
+    if not os.path.exists(project_name + '.dat'):
         return None
-    data = shelve.open(project_name,writeback=True)
+    data = shelve.open(project_name, writeback=True)
     return data
 
-def check_all_annotation(data:DbfilenameShelf):
+
+def check_all_annotation(data: DbfilenameShelf):
     return data['annotation']
 
-def output_annotations(data:DbfilenameShelf):
-    df:pd.DataFrame = data['annotation']
+
+def output_annotations(data: DbfilenameShelf):
+    df: pd.DataFrame = data['annotation']
     out_name = './result/' + 'result' + str(int(time.time())) + '.txt'
     outf = open(out_name, 'a+', encoding='utf-8')
     a = df.reset_index()
@@ -94,55 +97,67 @@ def output_annotations(data:DbfilenameShelf):
         outf.write(json_str + '\n')
     outf.close()
 
+
 class DataManager(object):
 
-    def __init__(self,project_name,file_path=None,):
-
+    def __init__(self, project_name, file_path=None, ):
         self.data = load_database(project_name)
         if self.data is None:
-            self.data = start_a_project(file_path,project_name)
+            self.data = start_a_project(file_path, project_name)
+        self.total_sent = len(set(self.data['id2sent'].keys()))
+        # self.done_num = len(self.data['done'])
+        self.all_sent_id = list(set(self.data['id2sent'].keys()))
         self.todo = list(set(self.data['id2sent'].keys()).difference(self.data['done']))
-        self.cur_idx = 0
+        self.cur_idx = len(self.data['done'])
 
-    def fetch_next(self,):
-        return self.todo[self.cur_idx]
+    def fetch_next(self, ):
+        # return self.todo[self.cur_idx]
+        return self.all_sent_id[self.cur_idx]
 
-    def commit(self,):
+    def fetch_prev(self):
+        if self.cur_idx > 0:
+            self.cur_idx -= 1
+            return self.all_sent_id[self.cur_idx]
+        else:
+            return -1
 
+    def fetch_by_index(self, index):
+        pass
+
+    def commit(self, ):
         sent_id = self.todo[self.cur_idx]
         commit(self.data, sent_id)
         self.cur_idx += 1
 
-    def save(self,sent_id:int,pred_idx:int,arg:dict):
-        save_annotations(self.data,sent_id,pred_idx,arg)
-        
-    def drop(self,send_id):
+    def save(self, sent_id: int, pred_idx: int, arg: dict):
+        save_annotations(self.data, sent_id, pred_idx, arg)
+
+    def drop(self, send_id):
         pass
 
-    def modify(self,sent_id):
+    def modify(self, sent_id):
         pass
 
-    def search_by_keyword(self,keyword):
-
+    def search_by_keyword(self, keyword):
         df = self.data['annotation']
-        return df[df['sent'].apply(lambda x:keyword in x)]
+        return df[df['sent'].apply(lambda x: keyword in x)]
 
-    def search_by_arg(self,arg_name:str,arg_span=None):
-
+    def search_by_arg(self, arg_name: str, arg_span=None):
         df = self.data['annotation']
-        return df[df['args'].apply(lambda x:arg_name in x)]
+        return df[df['args'].apply(lambda x: arg_name in x)]
 
-    def search_by_pred(self,pred:str):
+    def search_by_pred(self, pred: str):
         df = self.data['annotation']
-        return df[df[['pred','sent']].apply(lambda x: x['sent'].replace('<SEP> ','').split(' ')[int(x['pred'])] == pred,axis=1)]
+        return df[
+            df[['pred', 'sent']].apply(lambda x: x['sent'].replace('<SEP> ', '').split(' ')[int(x['pred'])] == pred,
+                                       axis=1)]
 
-    def get_all_pred(self,):
+    def get_all_pred(self, ):
         df = self.data['annotation']
-        return df[['pred', 'sent']].apply(lambda x: x['sent'].replace('<SEP> ','').split(' ')[int(x['pred'])], axis=1)
+        return df[['pred', 'sent']].apply(lambda x: x['sent'].replace('<SEP> ', '').split(' ')[int(x['pred'])], axis=1)
 
 
 if __name__ == '__main__':
-
     # data = start_a_project(file_path='./to_annotate/dev2.txt')
     # data = load_database('default')
     datamanager = DataManager('default')
