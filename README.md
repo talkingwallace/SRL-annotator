@@ -10,3 +10,19 @@
 
 - The format of output records (json list):
 ``{'sentid': sent_id, 'srl': [{'pred': 0, 'args':{'arg0': [], 'arg1': []}}, {'pred': 1, ...}, {'pred': 2, ...}, ...], 'sent': sentence}``
+
+用法说明:
+
+- Pred submit 每标注完一个pred后点击，自动保存标注记录
+
+- Sentence finish 标注完一个句子后点击，并直接跳转到下一个句子
+
+- Output result to json 输出到外部文件
+
+- prev 查看前一个句子
+
+- next 查看后一个已标注句子，无法查看未标注句子
+
+- jump to 跳转到第n个句子，0<= n <= 当前待标记句子index(已标记句子总数)；若n>当前待标记句子index，跳转到待标记句子
+
+- 修改： 若某pred标记错误，想修改该pred的标注信息，直接重新标注一遍该pred并pred submit以及sentence finish即可完成
