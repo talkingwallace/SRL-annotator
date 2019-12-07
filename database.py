@@ -21,14 +21,14 @@ def start_a_project(file_path, project_name='default', ):
     data = shelve.open(data_name, writeback=True)
 
     f = open(file_path, 'r', encoding='utf-8')
-    lines = f.readlines()
-    sents = set()
-    for line in lines:
-        if line is not None and len(line.strip()) > 0:
-            sents.update(line.strip())
+    sent_set = set()
+    sents = f.read().split('\n')
+    for sent in sents:
+        if sent != '':
+            sent_set.add(sent)
 
-    data['id2sent'] = {hash(v): v for idx, v in enumerate(sents)}
-    data['sent2id'] = {v: hash(v) for idx, v in enumerate(sents)}
+    data['id2sent'] = {hash(v): v for idx, v in enumerate(sent_set)}
+    data['sent2id'] = {v: hash(v) for idx, v in enumerate(sent_set)}
     data['annotation'] = pd.DataFrame({'sentid': [], 'pred': [], 'args': [], 'sent': []})
     # 'timestamp':[]
     data['done'] = set()
