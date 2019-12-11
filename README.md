@@ -17,7 +17,7 @@
 
 - Sentence finish 标注完一个句子后点击，并直接跳转到下一个句子
 
-- Output result to json 输出到外部文件
+- Output result to json 输出到外部文件，并统计pred总数
 
 - prev 查看前一个句子
 

@@ -74,6 +74,7 @@ def output_annotations(data: DbfilenameShelf):
     a = df.reset_index()
     sent_id_set = set(a['sentid'])
     new_record = {}
+    total_pred = 0
     for sent_id in sent_id_set:
         new_record['sentid'] = sent_id
         srl_list = []
@@ -92,6 +93,7 @@ def output_annotations(data: DbfilenameShelf):
                 tmp_dict['pred'] = int(row['pred'])
                 tmp_dict['args'] = row['args']
                 srl_list.append(tmp_dict)
+                total_pred += 1
             else:
                 for rev_i, d in enumerate(srl_list):
                     if d['pred'] == tmp_pred:
@@ -106,6 +108,7 @@ def output_annotations(data: DbfilenameShelf):
         json_str = json.dumps(new_record, ensure_ascii=False)
         outf.write(json_str + '\n')
     outf.close()
+    print('total predicates: ' + str(total_pred))
 
 
 class DataManager(object):
