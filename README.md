@@ -27,5 +27,7 @@
 
 - 修改： 若某pred标记错误，想修改该pred的标注信息，直接重新标注一遍该pred并pred submit以及sentence finish即可完成
 
+- 删除：将pred的arg0标记为-100，即可删除该pred所有arg
+
 如果发现有多条未标记句子，属于正常现象，因为前期数据存储结构的设计问题，导致之前标记的有些数据不是按顺序出现，并不影响最后的标注效果。
 这种情况也可以通过一直pred submit，完成句子标记后不点sentence finish，直接next到下一条句子即可解决。该bug后续将会解决。
