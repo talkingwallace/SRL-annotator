@@ -57,9 +57,12 @@ def commit(data: DbfilenameShelf, sent_id):
 
 
 def load_database(project_name: str):
-    if not os.path.exists(project_name + '.dat'):
-        return None
-    data = shelve.open(project_name, writeback=True)
+    if os.path.exists(project_name + '.dat'):
+        data = shelve.open(project_name, writeback=True)
+    elif os.path.exists(project_name + '.db'):
+        data = shelve.open(project_name, writeback=True)
+    else:
+        data = None
     return data
 
 
