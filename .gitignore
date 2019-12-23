@@ -133,3 +133,4 @@ default.dir
 result/
 .idea/
 .ipynb_checkpoints/
+xu_result.txt

@@ -155,9 +155,10 @@ class DataManager(object):
             self.cur_idx = self.done_num
             return self.all_sent_id[self.done_num]
 
-    def commit(self, ):
+    def commit(self, sent_id=None):
         # sent_id = self.to_do[self.cur_idx]
-        sent_id = self.all_sent_id[self.cur_idx]
+        if sent_id is None:
+            sent_id = self.all_sent_id[self.cur_idx]
         commit(self.data, sent_id)
         self.cur_idx += 1
         self.done_num = len(self.data['done'])
@@ -190,7 +191,7 @@ class DataManager(object):
         return df[['pred', 'sent']].apply(lambda x: x['sent'].replace('<SEP> ', '').split(' ')[int(x['pred'])], axis=1)
 
 
-if __name__ == '__main__':
+# if __name__ == '__main__':
     # data = start_a_project(file_path='./to_annotate/dev2.txt')
     # data = load_database('default')
-    datamanager = DataManager('default')
+    # datamanager = DataManager('default')
