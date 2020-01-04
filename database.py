@@ -194,9 +194,3 @@ class DataManager(object):
     def get_all_pred(self, ):
         df = self.data['annotation']
         return df[['pred', 'sent']].apply(lambda x: x['sent'].replace('<SEP> ', '').split(' ')[int(x['pred'])], axis=1)
-
-
-# if __name__ == '__main__':
-    # data = start_a_project(file_path='./to_annotate/dev2.txt')
-    # data = load_database('default')
-    # datamanager = DataManager('default')
