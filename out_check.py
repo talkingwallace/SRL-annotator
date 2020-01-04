@@ -32,7 +32,7 @@ def out_check(file_path, project_name='default'):
                 pred_args_spans.append(range(arg_v_s, arg_v_e))
                 # pred not in args span
                 if pred in range(arg_v_s, arg_v_e + 1):
-                    print('error {}: pred {}({}) in \'{}\' span'.format(sent_id, pred, seq_sent[pred], arg_key))
+                    print('error {}: pred {}({}) in \'{}\''.format(sent_id, pred, seq_sent[pred], arg_key))
                 # out of index
                 if pred >= sent_lens or arg_v_s >= sent_lens or arg_v_e >= sent_lens:
                     print('error {}: out of index occurred in pred {}({})'.format(sent_id, pred, seq_sent[pred]))

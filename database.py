@@ -146,7 +146,12 @@ class DataManager(object):
             return self.all_sent_id[self.cur_idx]
 
     def fetch_by_index(self, index):
+        # fetch by sent_id first
         index = int(index)
+        if index in set(self.all_sent_id):
+            self.cur_idx = self.all_sent_id.index(index)
+            return index
+        # fetch by index next
         if 0 <= index <= self.done_num:
             self.cur_idx = index
             return self.all_sent_id[index]
