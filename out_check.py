@@ -29,7 +29,7 @@ def out_check(file_path, project_name='default'):
             for arg_key in args.keys():
                 arg_v = args[arg_key]
                 arg_v_s, arg_v_e = int(arg_v[0]), int(arg_v[1])
-                pred_args_spans.append(range(arg_v_s, arg_v_e))
+                pred_args_spans.append(range(arg_v_s, arg_v_e + 1))
                 # pred not in args span
                 try:
                     if pred in range(arg_v_s, arg_v_e + 1):
@@ -47,7 +47,7 @@ def out_check(file_path, project_name='default'):
                 if len(set(tmp_check_span).intersection(args_span)) != 0:
                     print('error {}: spans overlapping occurred in pred {}({}) arg ({}, {})'.format(
                         sent_id, pred, seq_sent[pred], args_span[0], args_span[-1]))
-                tmp_check_span = list(set(tmp_check_span).difference(set(args_span)))
+                tmp_check_span = list(set(tmp_check_span) ^ (set(args_span)))
 
 
-out_check('./result/result1578363983.txt')
+out_check('./result/result1578365653.txt')
