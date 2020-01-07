@@ -31,13 +31,16 @@ def out_check(file_path, project_name='default'):
                 arg_v_s, arg_v_e = int(arg_v[0]), int(arg_v[1])
                 pred_args_spans.append(range(arg_v_s, arg_v_e))
                 # pred not in args span
-                if pred in range(arg_v_s, arg_v_e + 1):
-                    print('error {}: pred {}({}) in \'{}\''.format(sent_id, pred, seq_sent[pred], arg_key))
-                # out of index
-                if pred >= sent_lens or arg_v_s >= sent_lens or arg_v_e >= sent_lens:
-                    print('error {}: out of index occurred in pred {}({})'.format(sent_id, pred, seq_sent[pred]))
-                if arg_v_e - arg_v_s >= 20:
-                    print('Warning {}: arg span len exceeds 20. pred {}({})'.format(sent_id, pred, seq_sent[pred]))
+                try:
+                    if pred in range(arg_v_s, arg_v_e + 1):
+                        print('error {}: pred {}({}) in \'{}\''.format(sent_id, pred, seq_sent[pred], arg_key))
+                    # out of index
+                    if pred >= sent_lens or arg_v_s >= sent_lens or arg_v_e >= sent_lens:
+                        print('error {}: out of index occurred in pred {}({})'.format(sent_id, pred, seq_sent[pred]))
+                    if arg_v_e - arg_v_s >= 20:
+                        print('Warning {}: arg span len exceeds 20. pred {}({})'.format(sent_id, pred, seq_sent[pred]))
+                except:
+                    print('error occurred in sent {}')
             # overlap arg spans
             tmp_check_span = []
             for args_span in pred_args_spans:
@@ -47,4 +50,4 @@ def out_check(file_path, project_name='default'):
                 tmp_check_span = list(set(tmp_check_span).difference(set(args_span)))
 
 
-out_check('./result/result1578130522.txt')
+out_check('./result/result1578363983.txt')
